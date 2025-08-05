@@ -176,6 +176,7 @@ section {
 /* Results container */
 .results-container {
     margin-top: 20px;
+    overflow-x: auto; /* scroll horizontal para responsividade */
 }
 
 .no-results {
@@ -386,5 +387,27 @@ footer {
         font-size: 0.75rem;
         padding: 4px 8px;
     }
-}
 
+    /* Inputs e botão ocupam 100% da largura para facilitar o toque */
+    .sheet-url-input,
+    .search-input {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    .load-btn {
+        width: 100%;
+        padding: 12px 0;
+        min-width: unset;
+        font-size: 1rem;
+        margin-top: 15px;
+    }
+
+    .input-group {
+        margin-bottom: 25px;
+    }
+
+    header {
+        padding: 0 10px;
+    }
+}
