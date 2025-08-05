@@ -246,6 +246,6 @@ function showNoResults(message) {
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
-    sheetUrlInput.placeholder = 'https://docs.google.com/spreadsheets/d/SEU_ID_DA_PLANILHA/edit#gid=0';
+    sheetUrlInput.placeholder = 'Cole aqui o link da planilha';
     sheetUrlInput.focus();
 });
