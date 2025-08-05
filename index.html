@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca de Planilhas - Sistema de Filtro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sistema de Busca de Planilhas</h1>
+            <p>Digite o link da sua planilha do Google Sheets e busque por nome ou telefone</p>
+        </header>
+
+        <main>
+            <!-- Seção para inserir o link da planilha -->
+            <section class="sheet-input-section">
+                <div class="input-group">
+                    <label for="sheet-url">Link da Planilha do Google Sheets:</label>
+                    <input 
+                        type="url" 
+                        id="sheet-url" 
+                        placeholder="Cole aqui o link da sua planilha do Google Sheets"
+                        class="sheet-url-input"
+                    >
+                    <button id="load-sheet-btn" class="load-btn">Carregar Planilha</button>
+                </div>
+                <div id="sheet-status" class="status-message"></div>
+            </section>
+
+            <!-- Seção de busca -->
+            <section class="search-section">
+                <div class="input-group">
+                    <label for="search-input">Buscar por Nome ou Telefone:</label>
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Digite o nome ou número de telefone..."
+                        class="search-input"
+                        disabled
+                    >
+                </div>
+            </section>
+
+            <!-- Seção de resultados -->
+            <section class="results-section">
+                <div id="set-info" class="set-info"></div>
+                <div id="results-container" class="results-container">
+                    <div id="no-results" class="no-results">
+                        Carregue uma planilha e digite algo para buscar
+                    </div>
+                    <table id="results-table" class="results-table" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Set do Item</th>
+                                <th>Nome/Número</th>
+                                <th>Item</th>
+                                <th>Valor</th>
+                                <th>Pendência?</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Sistema de Busca de Planilhas - Desenvolvido para facilitar a consulta de dados</p>
+        </footer>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Carregando dados da planilha...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
