@@ -24,17 +24,6 @@ function extractSheetId(url) {
     return match ? match[1] : null;
 }
 
-// Função para converter link do Google Sheets para CSV
-function convertToCSVUrl(sheetUrl) {
-    const sheetId = extractSheetId(sheetUrl);
-    if (!sheetId) {
-        throw new Error('URL da planilha inválida');
-    }
-    
-    // URL para exportar como CSV
-    return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
-}
-
 // Função para mostrar status
 function showStatus(message, type) {
     sheetStatus.textContent = message;
@@ -59,16 +48,31 @@ async function loadSheet() {
         toggleLoading(true);
         showStatus('Carregando dados da planilha...', 'loading');
         
-        const csvUrl = convertToCSVUrl(url);
+        const sheetId = extractSheetId(url);
+        if (!sheetId) {
+            throw new Error('URL da planilha inválida');
+        }
         
-        // Fazer requisição para obter os dados CSV
-        const response = await fetch(csvUrl);
+        // Primeiro obter metadados para pegar o nome da planilha
+        const metadataUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/`;
+        const metadataResponse = await fetch(metadataUrl);
+        if (!metadataResponse.ok) {
+            throw new Error('Não foi possível obter informações da planilha');
+        }
         
-        if (!response.ok) {
+        const html = await metadataResponse.text();
+        const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+        const sheetName = titleMatch ? titleMatch[1].replace('- Google Sheets', '').trim() : 'Planilha';
+        
+        // Agora obter os dados CSV
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+        const csvResponse = await fetch(csvUrl);
+        
+        if (!csvResponse.ok) {
             throw new Error('Erro ao acessar a planilha. Verifique se ela está pública.');
         }
         
-        const csvText = await response.text();
+        const csvText = await csvResponse.text();
         
         // Processar os dados CSV
         const processedData = processCSVData(csvText);
@@ -79,11 +83,14 @@ async function loadSheet() {
         
         sheetData = processedData;
         
+        // Definir o nome da planilha como setInfo
+        setInfo = sheetName;
+        
         // Habilitar campo de busca
         searchInput.disabled = false;
         searchInput.focus();
         
-        showStatus(`Planilha carregada com sucesso! ${sheetData.length} registros encontrados.`, 'success');
+        showStatus(`Planilha "${sheetName}" carregada com sucesso! ${sheetData.length} registros encontrados.`, 'success');
         
         // Mostrar informações do set se disponível
         if (setInfo) {
@@ -110,24 +117,14 @@ async function loadSheet() {
 function processCSVData(csvText) {
     const lines = csvText.split('\n').filter(line => line.trim());
     const processedData = [];
-    let currentSet = '';
     let currentName = '';
     
-    for (let i = 0; i < lines.length; i++) {
+    // Ignorar a primeira linha se for cabeçalho
+    const startRow = lines[0].toLowerCase().includes('nome') ? 1 : 0;
+    
+    for (let i = startRow; i < lines.length; i++) {
         const line = lines[i];
         const columns = parseCSVLine(line);
-        
-        // Verificar se é uma linha de cabeçalho do SET
-        if (columns[0] && columns[0].includes('SET') && columns[0].includes('MPCS')) {
-            currentSet = columns[0].trim();
-            setInfo = currentSet; // Armazenar informação do set
-            continue;
-        }
-        
-        // Verificar se é uma linha de cabeçalho de colunas
-        if (columns[0] && (columns[0].toLowerCase().includes('nome') || columns[0].toLowerCase().includes('user'))) {
-            continue;
-        }
         
         // Processar linha de dados
         if (columns.length >= 4) {
@@ -144,7 +141,6 @@ function processCSVData(csvText) {
             // Se há item e preço, criar registro
             if (itemColumn && priceColumn) {
                 processedData.push({
-                    set: currentSet,
                     name: currentName,
                     item: itemColumn,
                     price: priceColumn,
@@ -223,7 +219,7 @@ function displayResults(data) {
         const paymentStatus = formatPaymentStatus(item.payment);
         
         row.innerHTML = `
-            <td>${item.set || ''}</td>
+            <td>${setInfo || 'Planilha'}</td>
             <td>${item.name || ''}</td>
             <td>${item.item || ''}</td>
             <td>${item.price || ''}</td>
@@ -287,4 +283,3 @@ searchInput.addEventListener('keypress', function(e) {
         performSearch();
     }
 });
-
