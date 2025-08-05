@@ -113,13 +113,26 @@ function processCSVData(csvText, abaNome) {
     const lines = csvText.split('\n').filter(line => line.trim());
     const processedData = [];
     let currentName = '';
+    let currentSet = abaNome;
 
-    const startRow = lines[0].toLowerCase().includes('nome') ? 1 : 0;
-
-    for (let i = startRow; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const columns = parseCSVLine(line);
 
+        // Pular linha de cabeçalho
+        if (columns[0]?.toLowerCase().includes('nome') && columns[1]?.toLowerCase().includes('item')) {
+            continue;
+        }
+
+        // Detectar título de seção [TÍTULO]
+        const cell = columns[0].trim();
+        const match = cell.match(/^\[(.+?)\]$/);
+        if (match) {
+            currentSet = match[1].trim();
+            continue;
+        }
+
+        // Linha válida de dados
         if (columns.length >= 4) {
             const nameColumn = columns[0]?.trim();
             const itemColumn = columns[1]?.trim();
@@ -135,7 +148,7 @@ function processCSVData(csvText, abaNome) {
                     price: priceColumn,
                     payment: paymentColumn,
                     searchText: `${currentName} ${itemColumn}`.toLowerCase(),
-                    sheetName: abaNome
+                    sheetName: currentSet || abaNome
                 });
             }
         }
